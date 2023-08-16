@@ -9,11 +9,8 @@ TELEGRAM_API_TOKEN = "6028401929:AAE222gMeVVvuBcBh5KLtD_Y6dxBh74YPcE"
 # Your Telegram chat ID
 CHAT_ID = "21141089"
 
-async def main():
-    st.title("Mobile-Friendly Order App")
-
-    # List of items from the dry items weekly indent list
-    items = [
+ # List of items from the dry items weekly indent list
+items = [
         "Aachi Bajji Bonda Powder",
         "Aam Panna",
         "Amruttulya Set",
@@ -63,10 +60,22 @@ async def main():
         "Water Bottle"
     ]
 
-    ordered_items = []
+async def main():
+    st.title("Dry Items Order App")
 
+    # Dropdown menu for selecting the location
+    selected_location = st.selectbox("Select Location:", ["VV Mohalla", "NIE", "Agrahara", "Kuvempunagar", "Hyd - Pragathi", "Siddartha Layout", "Depot"])
+
+    st.write(f"Ordering from: {selected_location}")
+
+    # Search bar for filtering items
+    search_query = st.text_input("Search for an item:")
+    filtered_items = [item for item in items if search_query.lower() in item.lower()]
+
+    # Display filtered items and allow quantity input
+    ordered_items = []
     st.write("Select the quantity of items:")
-    for index, item in enumerate(items):
+    for index, item in enumerate(filtered_items):
         quantity = st.number_input(f"{item} - Qty:", value=0, min_value=0, key=f"{item}_input_{index}")
         ordered_items.append((item, quantity))
 
@@ -79,22 +88,22 @@ async def main():
                 st.empty()  # Insert an empty space for separation
 
         # Send the order to Telegram and await the response
-        response = await send_order_to_telegram(ordered_items)
-        st.success("Order sent to Telegram!")
-        st.write("Telegram API response:", response)
+        response = await send_order_to_telegram(ordered_items, selected_location)
+        st.success("Thank You For Placing Your Order\n")
+        st.subheader("Please clear outstanding dues for order processing.")
 
-async def send_order_to_telegram(ordered_items):
+async def send_order_to_telegram(ordered_items, selected_location):
     try:
-        order_text = "Ordered Items:\n"
+        order_text = f"Order from: {selected_location}\n\nOrdered Items:\n"
         for item, quantity in ordered_items:
             if quantity > 0:
-                order_text += f"{item} - Qty: {quantity}\n"
+                order_text += f"{item}  X {quantity}\n"
         
-        bot = Bot(token=TELEGRAM_API_TOKEN)  # Use the token from the constant
-        response = await bot.send_message(chat_id=CHAT_ID, text=order_text)  # Use the chat_id from the constant and await the response
-        return response  # Return the response
+        bot = Bot(token=TELEGRAM_API_TOKEN)
+        response = await bot.send_message(chat_id=CHAT_ID, text=order_text)
+        return response
     except Exception as e:
-        return str(e)  # Return the error message
+        return str(e)
 
 if __name__ == "__main__":
     asyncio.run(main())
