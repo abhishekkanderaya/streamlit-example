@@ -102,8 +102,6 @@ item_data = {
 ]
 }
 
-
-
 async def main():
     st.title("Dry Items Order App")
 
@@ -112,33 +110,36 @@ async def main():
 
     st.write(f"Ordering from: {selected_location}")
 
-    selected_items = {}
-
+    # Display items for each section and allow quantity input
+    ordered_items = []
     for section, items in item_data.items():
         st.subheader(section)
-        search_query = st.text_input(f"Search {section}:", key=f"{section}_search")
-        filtered_items = [item for item in items if search_query.lower() in item.lower()]
-
+        search_term = st.text_input(f"Search {section} items:")
+        filtered_items = [item for item in items if search_term.lower() in item.lower()]
+        
         for item in filtered_items:
-            quantity = st.number_input(f"{item} - Qty:", value=0, min_value=0, key=f"{item}_input")
-            if quantity > 0:
-                selected_items[item] = quantity
+            item_key = f"{section}_{item}"  # Generate a unique key
+            quantity = st.number_input(f"{item} - Qty:", value=0, min_value=0, key=item_key)
+            ordered_items.append((item, quantity))
 
     if st.button("Submit"):
         st.write("Ordered Items:")
-        for item, quantity in selected_items.items():
-            st.write(f"{item} - Qty: {quantity}")
-            st.empty()  # Insert an empty space for separation
+        for ordered_item in ordered_items:
+            item, quantity = ordered_item
+            if quantity > 0:
+                st.write(f"{item} - Qty: {quantity}")
+                st.empty()  # Insert an empty space for separation
 
         # Send the order to Telegram and await the response
-        response = await send_order_to_telegram(selected_items, selected_location)
+        response = await send_order_to_telegram(ordered_items, selected_location)
         st.success("Thank You For Placing Your Order\n")
         st.subheader("Please clear outstanding dues for order processing.")
+
 
 async def send_order_to_telegram(ordered_items, selected_location):
     try:
         order_text = f"Order from: {selected_location}\n\nOrdered Items:\n"
-        for item, quantity in ordered_items.items():
+        for item, quantity in ordered_items:
             if quantity > 0:
                 order_text += f"{item}  X {quantity}\n"
         
