@@ -12,13 +12,13 @@ CHAT_ID = "21141089"
 # List of items for each section
 item_data = {
 "Bakery Items": [
-    "Pav",
+    "**Pav**",
     "Burger Bun",
     "Sweet Bun",
     "Veg Roll",
     "Gobi Roll"
 ],
-"Dry Items": [
+"**Dry Items**": [
     "Aachi Bajji Bonda Powder",
     "Aam Panna",
     "Amruttulya Set",
